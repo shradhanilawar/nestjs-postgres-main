@@ -11,7 +11,7 @@ export class EmployeeService {
     try {
       const { name, email } = createEmployeeDto;
       const query =
-        'INSERT INTO employee(name, email) VALUES ( $1, $2) RETURNING *';
+        'INSERT INTO employee(name, email) VALUES ( $1, $2) RETURNING * ';
       const data = this.db.query(query, [name, email]);
       return data;
     } catch (error) {
