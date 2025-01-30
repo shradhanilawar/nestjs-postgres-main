@@ -7,57 +7,39 @@ import { DatabaseService } from 'src/database/database.service';
 export class EmployeeService {
   constructor(private readonly db: DatabaseService) {}
 
-  create(createEmployeeDto: CreateEmployeeDto) {
-    try {
-      const { name, email } = createEmployeeDto;
-      const query =
-        'INSERT INTO employee(name, email) VALUES ( $1, $2) RETURNING *';
-      const data = this.db.query(query, [name, email]);
-      return data;
-    } catch (error) {
-      return error;
-    }
+  async create(createEmployeeDto: CreateEmployeeDto) {
+    const { name, email } = createEmployeeDto;
+    const query =
+      'INSERT INTO employee(name, email) VALUES ($1, $2) RETURNING *';
+    return this.executeQuery(query, [name, email]);
   }
 
-  findAll() {
-    try {
-      const query = 'select * from employee';
-      const data = this.db.query(query);
-      return data;
-    } catch (error) {
-      return error;
-    }
+  async findAll() {
+    return this.executeQuery('SELECT * FROM employee');
   }
 
-  findOne(id: number) {
-    try {
-      const query = 'SELECT * FROM employee WHERE id=$1';
-      const data = this.db.query(query, [id]);
-      return data;
-    } catch (error) {
-      return error;
-    }
+  async findOne(id: number) {
+    return this.executeQuery('SELECT * FROM employee WHERE id=$1', [id]);
   }
 
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    try {
-      const { name, email } = updateEmployeeDto;
-      const query =
-        'UPDATE employee SET name=$1, email=$2 WHERE id=$3  RETURNING *';
-      const data = this.db.query(query, [name, email, id]);
-      return data;
-    } catch (error) {
-      return error;
-    }
+  async update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
+    const { name, email } = updateEmployeeDto;
+    const query =
+      'UPDATE employee SET name=$1, email=$2 WHERE id=$3 RETURNING *';
+    return this.executeQuery(query, [name, email, id]);
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    return this.executeQuery('DELETE FROM employee WHERE id=$1 RETURNING *', [
+      id,
+    ]);
+  }
+
+  private async executeQuery(query: string, params: any[] = []) {
     try {
-      const query = 'DELETE FROM employee WHERE id=$1  RETURNING *';
-      const data = this.db.query(query, [id]);
-      return data;
+      return await this.db.query(query, params);
     } catch (error) {
-      return error;
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 }
